@@ -1,5 +1,6 @@
 ﻿using my_books.Data;
 using my_books.Data.Models;
+using my_books.Models;
 using my_books.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ namespace my_books.Services
             _context = context;
         }
 
-        public void AddBook(BooksVM books)
+        public void AddBookWithAuthor(BooksVM books)
         {
             Book _book = new Book()
             {
@@ -26,13 +27,27 @@ namespace my_books.Services
                 DateRead = books.IsRead ? books.DateRead.Value : null,
                 Rate = books.IsRead ? books.Rate.Value : null,
                 Genre = books.Genre,
-                Author = books.Author,
                 CoverUrl = books.CoverUrl,
                 DateAdded = DateTime.Now,
+                PublisherId = books.PublisherId,
             };
 
             _context.Books.Add(_book);
             _context.SaveChanges();
+
+            foreach (var item in books.AuthorsIds)
+            {
+                var _book_Author = new Book_Author()
+                {
+                    BookId = _book.Id,
+                    AuthorId = item,
+                };
+
+                _context.Book_Author.Add(_book_Author);
+                _context.SaveChanges();
+
+            }
+
         }
 
         public List<Book> GetAllBooks()
@@ -56,7 +71,6 @@ namespace my_books.Services
                 book.DateRead = books.IsRead ? books.DateRead.Value : null;
                 book.Rate = books.IsRead ? books.Rate.Value : null;
                 book.Genre = books.Genre;
-                book.Author = books.Author;
                 book.CoverUrl = books.CoverUrl;
 
                 _context.Books.Update(book);
